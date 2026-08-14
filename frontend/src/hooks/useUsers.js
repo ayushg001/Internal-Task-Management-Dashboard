@@ -3,10 +3,12 @@ import { apiService } from '../services/api';
 
 export function useUsers() {
   const [users, setUsers] = useState([]);
+  
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('user');
     return saved ? JSON.parse(saved) : null;
   });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
