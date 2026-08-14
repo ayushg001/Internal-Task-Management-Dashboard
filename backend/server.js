@@ -1,6 +1,8 @@
 // Express Server Entry Point
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
@@ -30,6 +32,26 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'UP', timestamp: new Date().toISOString() });
 });
 
+// Serve frontend static assets if dist directory exists
+const distPath = path.join(__dirname, '../frontend/dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+} else {
+  // Root API route greeting
+  app.get('/', (req, res) => {
+    res.json({
+      message: 'Internal Task & Management Dashboard API',
+      status: 'UP',
+      health: '/api/health',
+      docs: '/api/docs'
+    });
+  });
+}
+
 // 404 Route Handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found', message: `Cannot ${req.method} ${req.originalUrl}` });
@@ -48,3 +70,4 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+

@@ -33,12 +33,12 @@ async function findTasks({ status, priority, assignee, search, page = 1, limit =
   const safeSortBy = allowedSortColumns.includes(sortBy) ? `t.${sortBy}` : 't.created_at';
   const safeOrder = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-  // Count Query for Pagination
+  //             Pagination
   const countSql = `SELECT COUNT(*) as total FROM tasks t ${whereString}`;
   const countRes = await db.query(countSql, params);
   const totalItems = parseInt(countRes[0]?.total || 0);
 
-  // Data Query
+  //      Data Query
   const limitParamIdx = params.length + 1;
   const offsetParamIdx = params.length + 2;
   const queryParams = [...params, limit, offset];
@@ -139,18 +139,18 @@ async function getDashboardMetrics(userId = null) {
   const overdueRes = await db.query(`SELECT COUNT(*) as count FROM tasks WHERE due_date < CURRENT_DATE AND LOWER(status) != 'completed'`);
 
   let myTasksCount = 0;
-  if (userId) {
-    const myTasksRes = await db.query(`SELECT COUNT(*) as count FROM tasks WHERE assigned_to = $1 AND LOWER(status) != 'completed'`, [userId]);
-    myTasksCount = parseInt(myTasksRes[0]?.count || 0);
-  }
+    if (userId) {
+      const myTasksRes = await db.query(`SELECT COUNT(*) as count FROM tasks WHERE assigned_to = $1 AND LOWER(status) != 'completed'`, [userId]);
+      myTasksCount = parseInt(myTasksRes[0]?.count || 0);
+    }
 
-  return {
-    totalTasks: parseInt(totalRes[0]?.count || 0),
-    pendingTasks: parseInt(pendingRes[0]?.count || 0),
-    inProgressTasks: parseInt(inProgressRes[0]?.count || 0),
-    completedTasks: parseInt(completedRes[0]?.count || 0),
-    overdueTasks: parseInt(overdueRes[0]?.count || 0),
-    myAssignedTasks: myTasksCount
+    return {
+      totalTasks: parseInt(totalRes[0]?.count || 0),
+      pendingTasks: parseInt(pendingRes[0]?.count || 0),
+      inProgressTasks: parseInt(inProgressRes[0]?.count || 0),
+      completedTasks: parseInt(completedRes[0]?.count || 0),
+      overdueTasks: parseInt(overdueRes[0]?.count || 0),
+      myAssignedTasks: myTasksCount
   };
 }
 

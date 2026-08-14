@@ -5,6 +5,34 @@ const path = require('path');
 require('dotenv').config();
 
 async function initPostgres() {
+  if (process.env.DATABASE_URL) {
+    console.log('Connecting to remote PostgreSQL database using DATABASE_URL...');
+    const client = new Client({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+
+    try {
+      await client.connect();
+      console.log('Connected to remote PostgreSQL server.');
+
+      const schemaSql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf-8');
+      await client.query(schemaSql);
+      console.log('Successfully created tables (users, tasks, comments, activity_logs) in remote PostgreSQL!');
+      await client.end();
+
+      console.log('Running database seed script...');
+      const seed = require('./seed');
+      await seed();
+
+      console.log('\n PostgreSQL setup complete on remote database!');
+    } catch (err) {
+      console.error('Remote PostgreSQL Error:', err.message);
+      process.exit(1);
+    }
+    return;
+  }
+
   const dbName = process.env.DB_NAME || 'task_dashboard';
   const user = process.env.DB_USER || 'postgres';
   const password = process.env.DB_PASSWORD || 'postgresql';
@@ -81,3 +109,4 @@ async function initPostgres() {
 }
 
 initPostgres();
+
