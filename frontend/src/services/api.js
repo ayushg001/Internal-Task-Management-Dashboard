@@ -1,5 +1,5 @@
 // API Client Service for Frontend
-const API_BASE = 'https://internal-task-management-dashboard-vzzb.onrender.com/api';
+const API_BASE = 'https://internal-task-management-dashboard.onrender.com/api';
 
 function getAuthHeaders() {
   const token = localStorage.getItem('token');
